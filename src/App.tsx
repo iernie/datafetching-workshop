@@ -1,8 +1,11 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Link, Outlet } from "react-router-dom";
 
 const App = () => {
+  const queryClient = new QueryClient();
+
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <button
         className="reset"
         onClick={async () => {
@@ -19,7 +22,7 @@ const App = () => {
         <Link to="/oppgave/4">Oppgave 4</Link>
       </div>
       <Outlet />
-    </>
+    </QueryClientProvider>
   );
 };
 
