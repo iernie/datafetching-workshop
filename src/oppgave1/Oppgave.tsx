@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Todo } from "../types";
-import { addTodo, deleteTodo } from "../api/todos";
+import { addTodo } from "../api/todos";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getTodos, todoQueryKey, updateTodo } from "../api/todos";
+import { deleteTodo, getTodos, todoQueryKey, updateTodo } from "../api/todos";
 
 const Oppgave1 = () => {
   const [_, setTodos] = useState<Todo[]>([]);
@@ -22,7 +22,7 @@ const Oppgave1 = () => {
    * Endre onChange til å bruke mutation og oppdater staten med oppdatert liste
    */
   const queryClient = useQueryClient();
-  const { mutate } = useMutation({
+  const { mutate: updateQuery } = useMutation({
     mutationFn: updateTodo,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [todoQueryKey] });
@@ -33,11 +33,12 @@ const Oppgave1 = () => {
   /**
    * Endre deleteTodo til å bruke mutation og oppdater staten med oppdatert liste
    */
-  const deleteTodoItem = async (id: number) => {
-    await deleteTodo({ id });
-    const result = await getTodos();
-    setTodos(result);
-  };
+  const { mutate: deleteQuery } = useMutation({
+    mutationFn: deleteTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [todoQueryKey] });
+    },
+  });
 
   // OPPGAVE 1.d
   /**
@@ -62,13 +63,13 @@ const Oppgave1 = () => {
             <input
               checked={todo.completed}
               onChange={(e) =>
-                mutate({ id: todo.id, completed: e.target.checked })
+                updateQuery({ id: todo.id, completed: e.target.checked })
               }
               type="checkbox"
             />
             {todo.title}
             <span>
-              <button onClick={() => deleteTodoItem(todo.id)}>X</button>
+              <button onClick={() => deleteQuery({ id: todo.id })}>X</button>
             </span>
           </li>
         ))}
