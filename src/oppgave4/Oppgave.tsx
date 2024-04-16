@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react";
 import { User } from "../types";
-import { getUser, getUsers, getUsersWithAge } from "../api/users";
+import { getUser, getUsersWithAge } from "../api/users";
+import { useQuery } from "@tanstack/react-query";
+import { getUsers, usersQueryKey } from "../api/users";
 
 const Oppgave4 = () => {
   const [selectedUser, setSelectedUser] = useState<number>();
-  const [users, setUsers] = useState<Pick<User, "id" | "name">[]>([]);
 
   /**
    * OPPGAVE 4.a
    * Endre til å bruke valgt lib
    */
-  useEffect(() => {
-    (async () => {
-      const result = await getUsers();
-      setUsers(result);
-    })();
-  }, []);
+  const { data: users } = useQuery({
+    queryKey: [usersQueryKey],
+    queryFn: getUsers,
+  });
 
   /**
    * OPPGAVE 4.b
@@ -25,7 +24,7 @@ const Oppgave4 = () => {
     <>
       <h1>Users</h1>
       <ul>
-        {users.map((user) => (
+        {users?.map((user) => (
           <li key={user.id}>
             <a
               href=""
