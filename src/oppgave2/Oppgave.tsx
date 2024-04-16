@@ -8,6 +8,7 @@ const Oppgave2 = () => {
   /**
    * OPPGAVE 2.a
    * Endre fra en try-catch til å bruke den innebygde error-state fra valgt lib
+   * Se at den prøver å laste inn på nytt i dev tools
    */
   useEffect(() => {
     const getItems = async () => {
@@ -25,12 +26,6 @@ const Oppgave2 = () => {
 
   /**
    * OPPGAVE 2.b
-   * Klarer du vise forskjellige error meldinger basert på statuskoden?
-   * Fetch-en retunerer 403 eller 404 randomly
-   */
-
-  /**
-   * OPPGAVE 2.c
    * Endre loading-logikken til å bruke isLoading prop fra valgt lib
    */
   return (
@@ -48,7 +43,7 @@ const Oppgave2 = () => {
 };
 
 /**
- * OPPGAVE 2.d
+ * OPPGAVE 2.c
  * Bonusoppgave: Kan du erstatte både error og isLoading med en suspense?
  */
 
