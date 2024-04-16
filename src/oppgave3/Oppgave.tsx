@@ -26,7 +26,8 @@ const Oppgave3 = () => {
 
   /**
    * OPPGAVE 3.b
-   * Bonusoppgave: ???
+   * Åpne oppgave 1 i to faner, side om side.
+   * Legg til en ny todo i en fane, og se at den andre fanen oppdaterer state når den får focus.
    */
 
   return (

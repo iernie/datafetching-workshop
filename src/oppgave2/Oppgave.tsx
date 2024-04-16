@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Todo } from "../types";
 
 const Oppgave2 = () => {
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<number>();
   const [todos, setTodos] = useState<Todo[]>([]);
 
   /**
@@ -11,14 +11,13 @@ const Oppgave2 = () => {
    */
   useEffect(() => {
     const getItems = async () => {
-      try {
-        const result = await fetch("//localhost:3000/error").then((res) =>
-          res.json()
-        );
-        setTodos(result);
-        setError(false);
-      } catch {
-        setError(true);
+      const result = await fetch("//localhost:3000/error");
+
+      if (result.ok) {
+        setTodos(await result.json());
+        setError(undefined);
+      } else {
+        setError(result.status);
       }
     };
     getItems();
@@ -26,6 +25,12 @@ const Oppgave2 = () => {
 
   /**
    * OPPGAVE 2.b
+   * Klarer du vise forskjellige error meldinger basert på statuskoden?
+   * Fetch-en retunerer 403 eller 404 randomly
+   */
+
+  /**
+   * OPPGAVE 2.c
    * Endre loading-logikken til å bruke isLoading prop fra valgt lib
    */
   return (
@@ -43,7 +48,7 @@ const Oppgave2 = () => {
 };
 
 /**
- * OPPGAVE 2.c
+ * OPPGAVE 2.d
  * Bonusoppgave: Kan du erstatte både error og isLoading med en suspense?
  */
 

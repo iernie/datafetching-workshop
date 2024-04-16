@@ -84,7 +84,7 @@ app.delete("/todos/:id", (req, res) => {
 
 app.get("/error", (_, res) => {
   setTimeout(() => {
-    res.sendStatus(403);
+    res.sendStatus(Math.round(403 + Math.random()));
   }, 4000);
 });
 
