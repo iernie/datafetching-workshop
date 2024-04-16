@@ -1,21 +1,22 @@
-import { useEffect, useState } from "react";
-import { User } from "../types";
-import { getUser, getUsers, getUsersWithAge } from "../api/users";
+import { useState } from "react";
+import {
+  getUser,
+  getUserQueryKey,
+  getUsers,
+  getUsersWithAge,
+  getUsersWithAgeQueryKey,
+  usersQueryKey,
+} from "../api/users";
+import useSWR, { preload } from "swr";
 
 const Oppgave4 = () => {
   const [selectedUser, setSelectedUser] = useState<number>();
-  const [users, setUsers] = useState<Pick<User, "id" | "name">[]>([]);
 
   /**
    * OPPGAVE 4.a
    * Endre til å bruke valgt lib
    */
-  useEffect(() => {
-    (async () => {
-      const result = await getUsers();
-      setUsers(result);
-    })();
-  }, []);
+  const { data: users = [] } = useSWR(usersQueryKey, () => getUsers());
 
   /**
    * OPPGAVE 4.b
@@ -33,6 +34,11 @@ const Oppgave4 = () => {
                 e.preventDefault();
                 setSelectedUser(user.id);
               }}
+              onMouseOver={() => {
+                preload(getUserQueryKey({ id: user.id }), () =>
+                  getUser({ id: user.id })
+                );
+              }}
             >
               {user.name}
             </a>
@@ -45,28 +51,20 @@ const Oppgave4 = () => {
 };
 
 const UserInfo = ({ id }: { id: number | undefined }) => {
-  const [userInfo, setUserInfo] = useState<User>();
-  const [usersWithSameAge, setUsersWithSameAge] = useState<number>();
-
-  useEffect(() => {
-    setUserInfo(undefined);
-    setUsersWithSameAge(undefined);
-  }, [id]);
-
   /**
    * OPPGAVE 4.c
    * Endre til å bruke valgt lib med dependent queries
    */
-  useEffect(() => {
-    if (!id) return;
-    (async () => {
-      const user = await getUser({ id });
-      setUserInfo(user);
 
-      const usersWithSameAge = await getUsersWithAge({ age: user.age });
-      setUsersWithSameAge(+usersWithSameAge);
-    })();
-  }, [id]);
+  const { data: userInfo, isLoading: isLoadingUserInfo } = useSWR(
+    id ? getUserQueryKey({ id }) : undefined,
+    () => getUser({ id: id! })
+  );
+  const { data: usersWithSameAge, isLoading: isLoadingAge } = useSWR(
+    () =>
+      userInfo ? getUsersWithAgeQueryKey({ age: userInfo.age }) : undefined,
+    () => getUsersWithAge({ age: userInfo!.age })
+  );
 
   if (!id) return null;
 
@@ -74,15 +72,20 @@ const UserInfo = ({ id }: { id: number | undefined }) => {
    * OPPGAVE 4.d
    * Bonusoppgave: Kan du bruke (pending) state til fra lib til å vise innhold underveis?
    */
-  if (!userInfo || !usersWithSameAge) return <>Loading...</>;
+  if (isLoadingUserInfo && isLoadingAge) return <>Loading...</>;
 
   return (
     <div>
       <h2>User info</h2>
-      <div>Name: {userInfo.name}</div>
-      <div>Age: {userInfo.age}</div>
-      <div>Has job: {userInfo.job ? "yes" : "no"}</div>
-      <div>Users with same age: {usersWithSameAge}</div>
+      <div>Name: {isLoadingUserInfo ? "Loading..." : userInfo!.name}</div>
+      <div>Age: {isLoadingUserInfo ? "Loading..." : userInfo!.age}</div>
+      <div>
+        Has job:{" "}
+        {isLoadingUserInfo ? "Loading..." : userInfo!.job ? "yes" : "no"}
+      </div>
+      <div>
+        Users with same age: {isLoadingAge ? "Loading..." : usersWithSameAge}
+      </div>
     </div>
   );
 };
