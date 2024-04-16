@@ -76,7 +76,7 @@ const UserInfo = ({ id }: { id: number }) => {
 
   console.log({ userInfo });
 
-  const { data: usersWithSameAge } = useQuery({
+  const { data: usersWithSameAge, isLoading } = useQuery({
     queryKey: [getUsersWithAgeQueryKey({ age: userInfo?.age })],
     queryFn: () => getUsersWithAge({ age: userInfo!.age }),
     enabled: !!userInfo,
@@ -86,7 +86,7 @@ const UserInfo = ({ id }: { id: number }) => {
    * OPPGAVE 4.d
    * Bonusoppgave: Kan du bruke (pending) state til fra lib til å vise innhold underveis?
    */
-  if (!userInfo || !usersWithSameAge) return <>Loading...</>;
+  if (!userInfo) return <>Loading...</>;
 
   return (
     <div>
@@ -94,7 +94,9 @@ const UserInfo = ({ id }: { id: number }) => {
       <div>Name: {userInfo.name}</div>
       <div>Age: {userInfo.age}</div>
       <div>Has job: {userInfo.job ? "yes" : "no"}</div>
-      <div>Users with same age: {usersWithSameAge}</div>
+      <div>
+        Users with same age: {isLoading ? "Loading..." : usersWithSameAge}
+      </div>
     </div>
   );
 };
