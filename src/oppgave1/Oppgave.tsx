@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { Todo } from "../types";
-import { addTodo } from "../api/todos";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteTodo, getTodos, todoQueryKey, updateTodo } from "../api/todos";
+import {
+  addTodo,
+  deleteTodo,
+  getTodos,
+  todoQueryKey,
+  updateTodo,
+} from "../api/todos";
 
 const Oppgave1 = () => {
-  const [_, setTodos] = useState<Todo[]>([]);
   const [todoTitle, setTodoTitle] = useState("");
 
   // OPPGAVE 1.a
@@ -44,13 +48,36 @@ const Oppgave1 = () => {
   /**
    * Endre addTodoOptimistic til å bruke mutation med optimistic ui
    */
+  const { mutate: addQuery } = useMutation({
+    mutationFn: addTodo,
+    // When mutate is called:
+    onMutate: async (newTodo) => {
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: [todoQueryKey] });
+      // Snapshot the previous value
+      const previousTodos = queryClient.getQueryData([todoQueryKey]);
+      // Optimistically update to the new value
+      queryClient.setQueryData([todoQueryKey], (old: Todo[]) => [
+        ...old,
+        newTodo,
+      ]);
+      // Return a context object with the snapshotted value
+      return { previousTodos };
+    },
+    // If the mutation fails,
+    // use the context returned from onMutate to roll back
+    onError: (_err, _newTodo, context) => {
+      queryClient.setQueryData(["todos"], context?.previousTodos);
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [todoQueryKey] });
+    },
+  });
+
   const addTodoOptimistic = async () => {
-    setTodos((prev) => [
-      ...prev,
-      { title: todoTitle, completed: false, id: 0 },
-    ]);
-    const result = await addTodo({ title: todoTitle });
-    setTodos(result);
+    addQuery({ title: todoTitle }, {});
     setTodoTitle("");
   };
 
