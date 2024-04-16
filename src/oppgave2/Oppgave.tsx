@@ -1,28 +1,17 @@
-import { useEffect, useState } from "react";
-import { Todo } from "../types";
-import { getError } from "../api/errors";
+import { errorQueryKey, getError } from "../api/errors";
+import useSWR from "swr";
 
 const Oppgave2 = () => {
-  const [error, setError] = useState<boolean>(false);
-  const [todos, setTodos] = useState<Todo[]>([]);
-
   /**
    * OPPGAVE 2.a
    * Endre fra en try-catch til å bruke den innebygde error-state fra valgt lib
    * Se at den prøver å laste inn på nytt i dev tools
    */
-  useEffect(() => {
-    const getItems = async () => {
-      try {
-        const result = await getError();
-        setTodos(result);
-        setError(false);
-      } catch {
-        setError(true);
-      }
-    };
-    getItems();
-  }, []);
+  const {
+    data: todos = [],
+    error,
+    isLoading,
+  } = useSWR(errorQueryKey, () => getError());
 
   /**
    * OPPGAVE 2.b
@@ -31,7 +20,7 @@ const Oppgave2 = () => {
   return (
     <>
       <h1>Todos</h1>
-      {todos.length === 0 && !error && <>Loading...</>}
+      {isLoading && <>Loading...</>}
       {error && <h2>Noe gikk galt ved henting av data</h2>}
       <ul>
         {todos.map((todo) => (

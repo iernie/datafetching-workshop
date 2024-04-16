@@ -1,29 +1,34 @@
-import { useEffect, useState } from "react";
-import { Todo } from "../types";
-import { addTodo, deleteTodo, getTodos, updateTodo } from "../api/todos";
+import { useState } from "react";
+import {
+  addTodo,
+  deleteTodo,
+  getTodos,
+  todoQueryKey,
+  updateTodo,
+} from "../api/todos";
+import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
 
 const Oppgave1 = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
   const [todoTitle, setTodoTitle] = useState("");
 
   // OPPGAVE 1.a
   /**
    * Endre fra å bruke useEffect til å bruke hook-en fra valgt lib
    */
-  useEffect(() => {
-    (async () => {
-      const result = await getTodos();
-      setTodos(result);
-    })();
-  }, []);
+  const { data: todos = [], mutate } = useSWR(todoQueryKey, () => getTodos());
 
   // OPPGAVE 1.b
   /**
    * Endre onChange til å bruke mutation og oppdater staten med oppdatert liste
    */
+  const { trigger: triggerChecked } = useSWRMutation(
+    todoQueryKey,
+    (_, { arg }: { arg: { id: number; checked: boolean } }) =>
+      updateTodo({ id: arg.id, completed: arg.checked })
+  );
   const onChange = async (id: number, checked: boolean) => {
-    const result = await updateTodo({ id, completed: checked });
-    setTodos(result);
+    await triggerChecked({ id, checked });
   };
 
   // OPPGAVE 1.c
@@ -32,22 +37,32 @@ const Oppgave1 = () => {
    */
   const deleteTodoItem = async (id: number) => {
     await deleteTodo({ id });
-    const result = await getTodos();
-    setTodos(result);
+    mutate();
   };
 
   // OPPGAVE 1.d
   /**
    * Endre addTodoOptimistic til å bruke mutation med optimistic ui
    */
+  const { trigger: triggerAdd } = useSWRMutation(
+    todoQueryKey,
+    (_, { arg }: { arg: string }) => addTodo({ title: arg }),
+    {
+      optimisticData: (current = []) => [
+        ...current,
+        {
+          title: "loading",
+          completed: false,
+          id: 0,
+        },
+      ],
+      onSuccess: () => {
+        setTodoTitle("");
+      },
+    }
+  );
   const addTodoOptimistic = async () => {
-    setTodos((prev) => [
-      ...prev,
-      { title: todoTitle, completed: false, id: 0 },
-    ]);
-    const result = await addTodo({ title: todoTitle });
-    setTodos(result);
-    setTodoTitle("");
+    await triggerAdd(todoTitle);
   };
 
   return (
