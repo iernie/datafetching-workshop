@@ -1,21 +1,21 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Todo } from "../types";
-import { addTodo, deleteTodo, getTodos, updateTodo } from "../api/todos";
+import { addTodo, deleteTodo, updateTodo } from "../api/todos";
+import { useQuery } from "@tanstack/react-query";
+import { getTodos, todoQueryKey } from "../api/todos";
 
 const Oppgave1 = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const [_, setTodos] = useState<Todo[]>([]);
   const [todoTitle, setTodoTitle] = useState("");
 
   // OPPGAVE 1.a
   /**
    * Endre fra å bruke useEffect til å bruke hook-en fra valgt lib
    */
-  useEffect(() => {
-    (async () => {
-      const result = await getTodos();
-      setTodos(result);
-    })();
-  }, []);
+  const { data: todos } = useQuery({
+    queryKey: [todoQueryKey],
+    queryFn: getTodos,
+  });
 
   // OPPGAVE 1.b
   /**
@@ -54,7 +54,7 @@ const Oppgave1 = () => {
     <>
       <h1>Todos</h1>
       <ul>
-        {todos.map((todo) => (
+        {todos?.map((todo) => (
           <li key={todo.id}>
             <input
               checked={todo.completed}
