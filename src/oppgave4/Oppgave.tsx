@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
-import { User } from "../types";
-import { getUser, getUsersWithAge } from "../api/users";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getUsers, usersQueryKey } from "../api/users";
+import {
+  getUser,
+  getUserQueryKey,
+  getUsers,
+  getUsersWithAge,
+  getUsersWithAgeQueryKey,
+  usersQueryKey,
+} from "../api/users";
 
 const Oppgave4 = () => {
   const [selectedUser, setSelectedUser] = useState<number>();
@@ -38,36 +43,28 @@ const Oppgave4 = () => {
           </li>
         ))}
       </ul>
-      <UserInfo id={selectedUser} />
+      {selectedUser != null && <UserInfo id={selectedUser} />}
     </>
   );
 };
 
-const UserInfo = ({ id }: { id: number | undefined }) => {
-  const [userInfo, setUserInfo] = useState<User>();
-  const [usersWithSameAge, setUsersWithSameAge] = useState<number>();
-
-  useEffect(() => {
-    setUserInfo(undefined);
-    setUsersWithSameAge(undefined);
-  }, [id]);
-
+const UserInfo = ({ id }: { id: number }) => {
   /**
    * OPPGAVE 4.c
    * Endre til å bruke valgt lib med dependent queries
    */
-  useEffect(() => {
-    if (!id) return;
-    (async () => {
-      const user = await getUser({ id });
-      setUserInfo(user);
+  const { data: userInfo } = useQuery({
+    queryKey: [getUserQueryKey({ id })],
+    queryFn: () => getUser({ id: id }),
+  });
 
-      const usersWithSameAge = await getUsersWithAge({ age: user.age });
-      setUsersWithSameAge(+usersWithSameAge);
-    })();
-  }, [id]);
+  console.log({ userInfo });
 
-  if (!id) return null;
+  const { data: usersWithSameAge } = useQuery({
+    queryKey: [getUsersWithAgeQueryKey({ age: userInfo?.age })],
+    queryFn: () => getUsersWithAge({ age: userInfo!.age }),
+    enabled: !!userInfo,
+  });
 
   /**
    * OPPGAVE 4.d
