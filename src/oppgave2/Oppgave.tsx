@@ -7,7 +7,11 @@ const Oppgave2 = () => {
    * Endre fra en try-catch til å bruke den innebygde error-state fra valgt lib
    * Se at den prøver å laste inn på nytt i dev tools
    */
-  const { data: todos, error } = useQuery({
+  const {
+    data: todos,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: [errorQueryKey],
     queryFn: getError,
   });
@@ -19,7 +23,7 @@ const Oppgave2 = () => {
   return (
     <>
       <h1>Todos</h1>
-      {todos?.length === 0 && !error && <>Loading...</>}
+      {isLoading && <>Loading...</>}
       {error && <h2>Noe gikk galt ved henting av data</h2>}
       <ul>
         {todos?.map((todo) => (
