@@ -1,3 +1,3 @@
-import Oppgave from "./Oppgave4.tsx";
+import Oppgave from "./Oppgave.tsx";
 
 export default Oppgave;

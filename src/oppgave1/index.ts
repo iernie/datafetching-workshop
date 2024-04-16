@@ -1,3 +1,3 @@
-import Oppgave from "./Oppgave1";
+import Oppgave from "./Oppgave";
 
 export default Oppgave;

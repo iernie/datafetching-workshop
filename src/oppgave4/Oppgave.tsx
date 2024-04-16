@@ -38,7 +38,11 @@ const Oppgave4 = () => {
     setTodos(result);
   };
 
-  const addTodo = async () => {
+  const addTodoOptimistic = async () => {
+    setTodos((prev) => [
+      ...prev,
+      { title: todoTitle, completed: false, id: 0 },
+    ]);
     const result = await fetch("//localhost:3000/todos/", {
       method: "POST",
       headers: {
@@ -81,7 +85,11 @@ const Oppgave4 = () => {
               onChange={(e) => setTodoTitle(e.target.value)}
             />
           </label>
-          <button type="button" onClick={addTodo} disabled={todoTitle === ""}>
+          <button
+            type="button"
+            onClick={addTodoOptimistic}
+            disabled={todoTitle === ""}
+          >
             Add
           </button>
         </div>

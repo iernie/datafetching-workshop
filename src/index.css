@@ -123,3 +123,11 @@ label input {
 form button {
   flex: 0 0 auto;
 }
+
+.links {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  gap: 1rem;
+}

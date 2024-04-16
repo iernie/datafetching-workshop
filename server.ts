@@ -22,6 +22,7 @@ const initialState: Array<Todo> = [
 ];
 
 let todos = initialState;
+let counter = 0;
 
 app.use(bodyParser.json());
 
@@ -37,7 +38,8 @@ app.use((_, res, next) => {
 
 app.get("/reset", (_, res) => {
   todos = initialState;
-  res.send(200);
+  counter = 0;
+  res.sendStatus(200);
 });
 
 app.get("/todos", (_, res) => {
@@ -78,6 +80,20 @@ app.delete("/todos/:id", (req, res) => {
   const { id } = req.params;
   todos = todos.filter((t) => t.id !== +id);
   res.send(todos);
+});
+
+app.get("/error", (_, res) => {
+  res.sendStatus(403);
+});
+
+app.get("/polling", (_, res) => {
+  if (counter < 10) counter += 1;
+  res.send(
+    Array(Math.floor(counter + 3 / 3))
+      .fill(todos)
+      .flatMap((a) => a)
+      .slice(0, counter)
+  );
 });
 
 app.listen(3000, () => {
