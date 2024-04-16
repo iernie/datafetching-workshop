@@ -7,7 +7,7 @@ const Oppgave4 = () => {
 
   /**
    * OPPGAVE 4.a
-   * Endre til å bruke valgt lib med dependant queries
+   * Endre til å bruke valgt lib
    */
   useEffect(() => {
     const getUsers = async () => {
