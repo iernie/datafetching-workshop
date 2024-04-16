@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getUser,
   getUserQueryKey,
@@ -8,6 +8,7 @@ import {
   getUsersWithAgeQueryKey,
   usersQueryKey,
 } from "../api/users";
+import { User } from "../types";
 
 const Oppgave4 = () => {
   const [selectedUser, setSelectedUser] = useState<number>();
@@ -25,6 +26,20 @@ const Oppgave4 = () => {
    * OPPGAVE 4.b
    * Bruk prefrech/preload funksjon fra valgt lib på onHover til å hente inn data på forhånd
    */
+  const queryClient = useQueryClient();
+  const prefetch = (user: User) => {
+    queryClient.prefetchQuery({
+      queryKey: [getUserQueryKey({ id: user.id })],
+      queryFn: () => getUser({ id: user.id }),
+      staleTime: 60000,
+    });
+    queryClient.prefetchQuery({
+      queryKey: [getUsersWithAgeQueryKey({ age: user.age })],
+      queryFn: () => getUsersWithAge({ age: user.age }),
+      staleTime: 60000,
+    });
+  };
+
   return (
     <>
       <h1>Users</h1>
@@ -37,6 +52,7 @@ const Oppgave4 = () => {
                 e.preventDefault();
                 setSelectedUser(user.id);
               }}
+              onMouseEnter={() => prefetch(user)}
             >
               {user.name}
             </a>
