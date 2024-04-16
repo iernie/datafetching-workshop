@@ -1,100 +1,96 @@
 import { useEffect, useState } from "react";
-import { Todo } from "../types";
+import { User } from "../types";
 
 const Oppgave4 = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [todoTitle, setTodoTitle] = useState("");
+  const [selectedUser, setSelectedUser] = useState<number>();
+  const [users, setUsers] = useState<Pick<User, "id" | "name">[]>([]);
 
+  /**
+   * OPPGAVE 4.a
+   * Endre til å bruke valgt lib med dependant queries
+   */
   useEffect(() => {
-    const getTodos = async () => {
-      const result = await fetch("//localhost:3000/todos").then((res) =>
+    const getUsers = async () => {
+      const result = await fetch("//localhost:3000/users").then((res) =>
         res.json()
       );
-      setTodos(result);
+      setUsers(result);
     };
-    getTodos();
+    getUsers();
   }, []);
 
-  const onChange = async (id: number, checked: boolean) => {
-    const result = await fetch("//localhost:3000/todos/" + id, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        completed: checked,
-      }),
-    }).then((res) => res.json());
-    setTodos(result);
-  };
-
-  const deleteTodo = async (id: number) => {
-    const result = await fetch("//localhost:3000/todos/" + id, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((res) => res.json());
-    setTodos(result);
-  };
-
-  const addTodoOptimistic = async () => {
-    setTodos((prev) => [
-      ...prev,
-      { title: todoTitle, completed: false, id: 0 },
-    ]);
-    const result = await fetch("//localhost:3000/todos/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: todoTitle,
-      }),
-    }).then((res) => res.json());
-    setTodos(result);
-    setTodoTitle("");
-  };
-
+  /**
+   * OPPGAVE 4.b
+   * Bruk prefrech/preload funksjon fra valgt lib på onHover til å hente inn data på forhånd
+   */
   return (
     <>
-      <h1>Todos</h1>
+      <h1>Users</h1>
       <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>
-            <input
-              checked={todo.completed}
-              onChange={(e) => onChange(todo.id, e.target.checked)}
-              type="checkbox"
-            />
-            {todo.title}
-            <span>
-              <button onClick={() => deleteTodo(todo.id)}>X</button>
-            </span>
+        {users.map((user) => (
+          <li key={user.id}>
+            <a
+              href=""
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedUser(user.id);
+              }}
+            >
+              {user.name}
+            </a>
           </li>
         ))}
       </ul>
-      <form>
-        <h2>Add todo item</h2>
-        <div>
-          <label>
-            <input
-              type="text"
-              placeholder="Title"
-              value={todoTitle}
-              onChange={(e) => setTodoTitle(e.target.value)}
-            />
-          </label>
-          <button
-            type="button"
-            onClick={addTodoOptimistic}
-            disabled={todoTitle === ""}
-          >
-            Add
-          </button>
-        </div>
-      </form>
+      <UserInfo id={selectedUser} />
     </>
+  );
+};
+
+const UserInfo = ({ id }: { id: number | undefined }) => {
+  const [userInfo, setUserInfo] = useState<User>();
+  const [usersWithSameAge, setUsersWithSameAge] = useState<number>();
+
+  useEffect(() => {
+    setUserInfo(undefined);
+    setUsersWithSameAge(undefined);
+  }, [id]);
+
+  /**
+   * OPPGAVE 4.c
+   * Endre til å bruke valgt lib med dependent queries
+   */
+  useEffect(() => {
+    if (!id) return;
+    const getUser = async () => {
+      const user = await fetch("//localhost:3000/users/" + id).then((res) =>
+        res.json()
+      );
+      setUserInfo(user);
+
+      const usersWithSameAge = await fetch(
+        "//localhost:3000/users/age/" + user.age
+      ).then((res) => res.json());
+      setUsersWithSameAge(usersWithSameAge);
+    };
+    getUser();
+  }, [id]);
+
+  if (!id) return null;
+
+  /**
+   * OPPGAVE 4.d
+   * Bonusoppgave: Kan du bruke (pending) state til fra lib til å vise innhold underveis?
+   */
+  if (!userInfo || !usersWithSameAge) return <>Loading...</>;
+
+  return (
+    <div>
+      <h2>User info</h2>
+      <div>Name: {userInfo.name}</div>
+      <div>Age: {userInfo.age}</div>
+      <div>Has job: {userInfo.job}</div>
+      <div>Users with same age: {usersWithSameAge}</div>
+    </div>
   );
 };
 

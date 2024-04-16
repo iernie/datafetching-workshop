@@ -2,48 +2,49 @@ import { useEffect, useState } from "react";
 import { Todo } from "../types";
 
 const Oppgave2 = () => {
+  const [error, setError] = useState(false);
   const [todos, setTodos] = useState<Todo[]>([]);
 
+  /**
+   * OPPGAVE 2.a
+   * Endre fra en try-catch til å bruke den innebygde error-state fra valgt lib
+   */
   useEffect(() => {
-    const getTodos = async () => {
-      const result = await fetch("//localhost:3000/todos").then((res) =>
-        res.json()
-      );
-      setTodos(result);
+    const getItems = async () => {
+      try {
+        const result = await fetch("//localhost:3000/error").then((res) =>
+          res.json()
+        );
+        setTodos(result);
+        setError(false);
+      } catch {
+        setError(true);
+      }
     };
-    getTodos();
+    getItems();
   }, []);
 
-  const onChange = async (id: number, checked: boolean) => {
-    const result = await fetch("//localhost:3000/todos/" + id, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        completed: checked,
-      }),
-    }).then((res) => res.json());
-    setTodos(result);
-  };
-
+  /**
+   * OPPGAVE 2.b
+   * Endre loading-logikken til å bruke isLoading prop fra valgt lib
+   */
   return (
     <>
       <h1>Todos</h1>
+      {todos.length === 0 && !error && <>Loading...</>}
+      {error && <h2>Noe gikk galt ved henting av data</h2>}
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>
-            <input
-              checked={todo.completed}
-              onChange={(e) => onChange(todo.id, e.target.checked)}
-              type="checkbox"
-            />
-            {todo.title}
-          </li>
+          <li key={todo.id}>{todo.title}</li>
         ))}
       </ul>
     </>
   );
 };
+
+/**
+ * OPPGAVE 2.c
+ * Bonusoppgave: Kan du erstatte både error og isLoading med en suspense?
+ */
 
 export default Oppgave2;

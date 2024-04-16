@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import express from "express";
-import { Todo } from "./src/types";
+import { Todo, User } from "./src/types";
 const app = express();
 
 const initialState: Array<Todo> = [
@@ -79,11 +79,13 @@ app.post("/todos/:id", (req, res) => {
 app.delete("/todos/:id", (req, res) => {
   const { id } = req.params;
   todos = todos.filter((t) => t.id !== +id);
-  res.send(todos);
+  res.sendStatus(200);
 });
 
 app.get("/error", (_, res) => {
-  res.sendStatus(403);
+  setTimeout(() => {
+    res.sendStatus(403);
+  }, 4000);
 });
 
 app.get("/polling", (_, res) => {
@@ -94,6 +96,60 @@ app.get("/polling", (_, res) => {
       .flatMap((a) => a)
       .slice(0, counter)
   );
+});
+
+const users: Array<User> = [
+  {
+    id: 420,
+    name: "Per",
+    job: false,
+    age: 34,
+  },
+  {
+    id: 1337,
+    name: "Kari",
+    job: true,
+    age: 27,
+  },
+  {
+    id: 69,
+    name: "Vegard",
+    job: false,
+    age: 27,
+  },
+  {
+    id: 1881,
+    name: "Heidi",
+    job: false,
+    age: 32,
+  },
+  {
+    id: 1,
+    name: "Truls",
+    job: true,
+    age: 4,
+  },
+];
+
+app.get("/users", (_, res) => {
+  res.send(
+    users.map((u) => ({
+      id: u.id,
+      name: u.name,
+    }))
+  );
+});
+
+app.get("/users/:id", (req, res) => {
+  const { id } = req.params;
+  res.send(users.find((u) => u.id === +id));
+});
+
+app.get("/users/age/:age", (req, res) => {
+  const { age } = req.params;
+  setTimeout(() => {
+    res.send(users.filter((u) => u.age === +age).length + "");
+  }, 4000);
 });
 
 app.listen(3000, () => {
