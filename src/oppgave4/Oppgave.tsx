@@ -81,7 +81,7 @@ const UserInfo = ({ id }: { id: number | undefined }) => {
       <h2>User info</h2>
       <div>Name: {userInfo.name}</div>
       <div>Age: {userInfo.age}</div>
-      <div>Has job: {userInfo.job}</div>
+      <div>Has job: {userInfo.job ? "yes" : "no"}</div>
       <div>Users with same age: {usersWithSameAge}</div>
     </div>
   );
