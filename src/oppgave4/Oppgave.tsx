@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { User } from "../types";
+import { getUser, getUsers, getUsersWithAge } from "../api/users";
 
 const Oppgave4 = () => {
   const [selectedUser, setSelectedUser] = useState<number>();
@@ -10,13 +11,10 @@ const Oppgave4 = () => {
    * Endre til å bruke valgt lib
    */
   useEffect(() => {
-    const getUsers = async () => {
-      const result = await fetch("//localhost:3000/users").then((res) =>
-        res.json()
-      );
+    (async () => {
+      const result = await getUsers();
       setUsers(result);
-    };
-    getUsers();
+    })();
   }, []);
 
   /**
@@ -61,18 +59,13 @@ const UserInfo = ({ id }: { id: number | undefined }) => {
    */
   useEffect(() => {
     if (!id) return;
-    const getUser = async () => {
-      const user = await fetch("//localhost:3000/users/" + id).then((res) =>
-        res.json()
-      );
+    (async () => {
+      const user = await getUser({ id });
       setUserInfo(user);
 
-      const usersWithSameAge = await fetch(
-        "//localhost:3000/users/age/" + user.age
-      ).then((res) => res.json());
-      setUsersWithSameAge(usersWithSameAge);
-    };
-    getUser();
+      const usersWithSameAge = await getUsersWithAge({ age: user.age });
+      setUsersWithSameAge(+usersWithSameAge);
+    })();
   }, [id]);
 
   if (!id) return null;

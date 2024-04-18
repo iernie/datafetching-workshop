@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Todo } from "../types";
+import { getError } from "../api/errors";
 
 const Oppgave2 = () => {
-  const [error, setError] = useState<number>();
+  const [error, setError] = useState<boolean>(false);
   const [todos, setTodos] = useState<Todo[]>([]);
 
   /**
@@ -12,13 +13,12 @@ const Oppgave2 = () => {
    */
   useEffect(() => {
     const getItems = async () => {
-      const result = await fetch("//localhost:3000/error");
-
-      if (result.ok) {
-        setTodos(await result.json());
-        setError(undefined);
-      } else {
-        setError(result.status);
+      try {
+        const result = await getError();
+        setTodos(result);
+        setError(false);
+      } catch {
+        setError(true);
       }
     };
     getItems();

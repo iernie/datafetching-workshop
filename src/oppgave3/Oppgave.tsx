@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Todo } from "../types";
+import { getPolling } from "../api/polling";
 
 const Oppgave3 = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -11,9 +12,7 @@ const Oppgave3 = () => {
    */
   useEffect(() => {
     const interval = setInterval(async () => {
-      const result = await fetch("//localhost:3000/polling").then((res) =>
-        res.json()
-      );
+      const result = await getPolling();
       setTodos(result);
 
       if (result.length >= 10) clearInterval(interval);

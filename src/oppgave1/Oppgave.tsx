@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Todo } from "../types";
+import { addTodo, deleteTodo, getTodos, updateTodo } from "../api/todos";
 
 const Oppgave1 = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -10,13 +11,10 @@ const Oppgave1 = () => {
    * Endre fra å bruke useEffect til å bruke hook-en fra valgt lib
    */
   useEffect(() => {
-    const getTodos = async () => {
-      const result = await fetch("//localhost:3000/todos").then((res) =>
-        res.json()
-      );
+    (async () => {
+      const result = await getTodos();
       setTodos(result);
-    };
-    getTodos();
+    })();
   }, []);
 
   // OPPGAVE 1.b
@@ -24,15 +22,7 @@ const Oppgave1 = () => {
    * Endre onChange til å bruke mutation og oppdater staten med oppdatert liste
    */
   const onChange = async (id: number, checked: boolean) => {
-    const result = await fetch("//localhost:3000/todos/" + id, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        completed: checked,
-      }),
-    }).then((res) => res.json());
+    const result = await updateTodo({ id, completed: checked });
     setTodos(result);
   };
 
@@ -40,16 +30,9 @@ const Oppgave1 = () => {
   /**
    * Endre deleteTodo til å bruke mutation og oppdater staten med oppdatert liste
    */
-  const deleteTodo = async (id: number) => {
-    await fetch("//localhost:3000/todos/" + id, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const result = await fetch("//localhost:3000/todos").then((res) =>
-      res.json()
-    );
+  const deleteTodoItem = async (id: number) => {
+    await deleteTodo({ id });
+    const result = await getTodos();
     setTodos(result);
   };
 
@@ -62,15 +45,7 @@ const Oppgave1 = () => {
       ...prev,
       { title: todoTitle, completed: false, id: 0 },
     ]);
-    const result = await fetch("//localhost:3000/todos/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: todoTitle,
-      }),
-    }).then((res) => res.json());
+    const result = await addTodo({ title: todoTitle });
     setTodos(result);
     setTodoTitle("");
   };
@@ -88,7 +63,7 @@ const Oppgave1 = () => {
             />
             {todo.title}
             <span>
-              <button onClick={() => deleteTodo(todo.id)}>X</button>
+              <button onClick={() => deleteTodoItem(todo.id)}>X</button>
             </span>
           </li>
         ))}
