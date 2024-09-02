@@ -44,6 +44,8 @@ export async function deleteTodo({ id }: Pick<Todo, "id">): Promise<boolean> {
 }
 
 export async function addTodo({ title }: Pick<Todo, "title">): Promise<Todo[]> {
+  await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulating waiting time for backend
+
   const response = await fetch(`${BASE_URL}/${todoQueryKey}`, {
     method: "POST",
     headers: {
